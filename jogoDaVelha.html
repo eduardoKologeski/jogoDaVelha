@@ -1,0 +1,207 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Amatic+SC&family=Delicious+Handrawn&display=swap');
+
+        * {
+            font-family: 'Amatic SC', cursive;
+            /* font-family: 'Delicious Handrawn', cursive; */
+        }
+
+        #main {
+            padding: 10;
+            background-image: url('caderno.png');
+            margin: 0 auto;
+            height: 360px;
+            width: 260px;
+            background-repeat: no-repeat;
+            text-align: center;
+            /* border: 3pt dotted blue; */
+        }
+
+        .middle {
+            border-top: 2pt solid black;
+            border-bottom: 2pt solid black;
+        }
+
+        .center {
+            border-left: 2pt solid black;
+            border-right: 2pt solid black;
+        }
+
+        td {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        .centralizado {
+            margin: 0 auto;
+            /* border: 1pt dotted gray; */
+        }
+
+        #mensagem {
+            margin: 10;
+            text-align: center;
+        }
+
+        #reset {
+            font-size: 1.1em;
+            height: 40px;
+            padding: 2px;
+            padding-left: 20px;
+            padding-right: 20px;
+            border-radius: 3px;
+            border: 2pt solid gray;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        let turno = 'X';
+        let tabuleiro = [null, null, null, null, null, null, null, null, null];
+        let jogadas = 0;
+        let ganhador = 0;
+
+        function play(col, row) {
+            if (jogadas === 9 || ganhador !== 0) {
+                alert('Reinicie o jogo');
+                return;
+            }
+
+            if (tabuleiro[col + row * 3]) {
+                alert('Jogada inválida');
+                return;
+            }
+
+            tabuleiro[col + row * 3] = turno;
+            jogadas++;
+
+            var cell = document.getElementById('c' + col + row);
+            cell.innerHTML = turno;
+
+            // determinar ganhador!!!!
+            // 1 - Identificar se, a partir da posição clicada, fechou a sequência: 
+            //     horizontal, vertical e, se for o caso, diagonal
+            ganhador = verificaFimDeJogo(col, row);
+            // 2 - Escrever o ganhador ou empate.
+            var msg = document.getElementById('mensagem');
+            if (ganhador >= 1) {
+                msg.innerHTML = 'Player <b>' + turno + '</b> ganhou!';
+                msg.style.color = 'blue';
+                destaqueGanhador(ganhador, col, row);
+                return;
+            } else if (ganhador === -1) {
+                msg.innerHTML = 'Empatou!';
+                msg.style.color = 'red';
+                return;
+            }
+
+            turno = turno === 'X' ? 'O' : 'X';
+            // var msg = document.getElementById('mensagem');
+            msg.innerHTML = 'Player ' + turno;
+        }
+
+        function reset() {
+            jogadas = 0;
+            tabuleiro = [null, null, null, null, null, null, null, null, null];
+            turno = 'X';
+            ganhador = 0;
+            var msg = document.getElementById('mensagem');
+            msg.innerHTML = 'Player ' + turno;
+            msg.style.color = 'black';
+            for (let row = 0; row < 3; row++) {
+                for (let col = 0; col < 3; col++) {
+                    var cell = document.getElementById('c' + col + row);
+                    cell.innerHTML = '';
+                    cell.style.color = 'black';
+                }
+            }
+        }
+
+        function verificaFimDeJogo(col, row) {
+            if ((tabuleiro[col] === turno) && (tabuleiro[col + 3] === turno) && (tabuleiro[col + 6] === turno)) {
+                return 1; // jogador do turno ganhou!
+            }
+
+            if ((tabuleiro[row * 3] === turno) && (tabuleiro[1 + row * 3] === turno) && (tabuleiro[2 + row * 3] === turno)) {
+                return 2; // jogador do turno ganhou!
+            }
+
+            if ((col === row) || (col === 0 && row === 2) || (col === 2 && row === 0)) { // jogada na diagonal
+                if ((tabuleiro[0] === turno) && (tabuleiro[4] === turno) && (tabuleiro[8] === turno)) {
+                    return 3; // jogador do turno ganhou!
+                }
+                if ((tabuleiro[2] === turno) && (tabuleiro[4] === turno) && (tabuleiro[6] === turno)) {
+                    return 4; // jogador do turno ganhou!
+                }
+            }
+
+            if (jogadas === 9) {
+                return -1; // empate!
+            }
+
+            return 0; // continua jogando.
+        }
+
+        function destaqueGanhador(ganhador, col, row) {
+            if (ganhador === 1) {
+                for (let row = 0; row < 3; row++) {
+                    var cell = document.getElementById('c' + col + row);
+                    cell.style.color = 'blue';
+                }
+            } else if (ganhador === 2) {
+                for (let col = 0; col < 3; col++) {
+                    var cell = document.getElementById('c' + col + row);
+                    cell.style.color = 'blue';
+                }
+            } else if (ganhador === 3) {
+                for (let col = 0; col < 3; col++) {
+                    var cell = document.getElementById('c' + col + col);
+                    cell.style.color = 'blue';
+                }
+            } else {
+                for (let col = 0; col < 3; col++) {
+                    var cell = document.getElementById('c' + col + (2 - col));
+                    cell.style.color = 'blue';
+                }
+            }
+        }
+
+    </script>
+
+    <div id="main">
+        <br><br><br>
+        <table class="centralizado">
+            <tr>
+                <td id="c00" onclick="play(0, 0)"></td>
+                <td id="c10" onclick="play(1, 0)" class="center"></td>
+                <td id="c20" onclick="play(2, 0)"></td>
+            </tr>
+            <tr>
+                <td id="c01" onclick="play(0, 1)" class="middle"></td>
+                <td id="c11" onclick="play(1, 1)" class="middle center"></td>
+                <td id="c21" onclick="play(2, 1)" class="middle"></td>
+            </tr>
+            <tr>
+                <td id="c02" onclick="play(0, 2)"></td>
+                <td id="c12" onclick="play(1, 2)" class="center"></td>
+                <td id="c22" onclick="play(2, 2)"></td>
+            </tr>
+        </table>
+        <h2 id="mensagem" class="centralizado">Player X<h2>
+                <button id="reset" class="centralizado" onclick="reset()">Reset</button>
+    </div>
+</body>
+
+</html>
